@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- PERSONALIZE: título e descrição que aparecem no Google e ao compartilhar o link.
+       A versão em inglês de todos os textos fica em js/i18n-en.js (mesmas chaves dos data-i18n). -->
+  <title>Willian Ribeiro · Desenvolvedor Full Stack</title>
+  <meta name="description" content="Portfólio e currículo de Willian Ribeiro, Desenvolvedor Full Stack com C#, .NET e SQL Server no Rio de Janeiro.">
+  <meta property="og:title" content="Willian Ribeiro · Desenvolvedor Full Stack">
+  <meta property="og:description" content="Sistemas corporativos com C#, .NET e SQL Server, do banco de dados à interface.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#06090f">
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <!-- Fontes: as mesmas do g4business.com (Manrope + Libre Baskerville itálica nos destaques).
+       A PP Museum usada lá nos rótulos é uma fonte paga; aqui os rótulos usam JetBrains Mono. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Libre+Baskerville:ital@1&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Marca que o JS está ativo antes da pintura; sem JS, todo o conteúdo fica visível. -->
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <!-- Ícones reutilizados (referenciados com <use href="#i-...">) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4 1.5-4-2-6-2m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 00-6.2 0C6.5 2.800 5.400 3.100 5.400 3.100a4.200 4.200 0 00-.100 3.200A4.600 4.600 0 004 9.500c0 4.600 2.700 5.700 5.500 6-.600.600-.600 1.200-.500 2V21"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#conteudo" data-i18n="skip">Pular para o conteúdo</a>
+
+  <!-- Barra de progresso de leitura -->
+  <div class="progress" aria-hidden="true"><span class="progress__bar" id="progress-bar"></span></div>
+
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a class="brand" href="#topo" aria-label="Willian Ribeiro, voltar ao início" data-i18n-attr="aria-label:brand.label">
+        <span class="brand__mark" aria-hidden="true">&lt;/&gt;</span>
+        <!-- PERSONALIZE: nome exibido no cabeçalho -->
+        <span class="brand__name">Willian Ribeiro</span>
+      </a>
+
+      <div class="header__actions">
+        <nav class="nav" id="nav" aria-label="Seções da página" data-i18n-attr="aria-label:nav.label">
+          <ul class="nav__list">
+            <li><a class="nav__link" href="#sobre" data-i18n="nav.about">Sobre</a></li>
+            <li><a class="nav__link" href="#projetos" data-i18n="nav.projects">Projetos</a></li>
+            <li><a class="nav__link" href="#stack">Stack</a></li>
+            <li><a class="nav__link" href="#trajetoria" data-i18n="nav.journey">Trajetória</a></li>
+            <li><a class="nav__link nav__link--cta" href="#contato" data-i18n="nav.contact">Contato</a></li>
+          </ul>
+        </nav>
+
+        <!-- Seletor de idioma (PT é o padrão do HTML; EN vem de js/i18n-en.js) -->
+        <div class="lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
+          <button class="lang__btn" type="button" data-lang="pt" aria-pressed="true" lang="pt-BR" title="Português">PT</button>
+          <button class="lang__btn" type="button" data-lang="en" aria-pressed="false" lang="en" title="English">EN</button>
+        </div>
+
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">
+          <span class="visually-hidden" id="nav-toggle-label">Abrir menu</span>
+          <span class="nav-toggle__bars" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="conteudo">
+
+    <!-- ============ 1. HERO ============ -->
+    <section class="hero" id="topo">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <div class="hero__content">
+          <p class="eyebrow reveal"><span class="dot" aria-hidden="true"></span><span data-i18n="hero.location">Rio de Janeiro, Brasil</span></p>
+
+          <!-- PERSONALIZE: nome e cargo -->
+          <h1 class="hero__title reveal">
+            Willian Ribeiro
+            <span class="hero__role" data-i18n="hero.role">Desenvolvedor <em class="accent">Full Stack</em></span>
+          </h1>
+
+          <!-- PERSONALIZE: frase curta de apresentação -->
+          <p class="hero__lead reveal" data-i18n="hero.lead">
+            Construo e evoluo sistemas corporativos com C#, .NET e SQL Server,
+            do banco de dados à interface.
+          </p>
+
+          <div class="hero__actions reveal">
+            <a class="btn btn--primary" href="#projetos" data-i18n="hero.cta">Ver projetos</a>
+            <!-- PERSONALIZE: troque o arquivo em /assets e ajuste o nome aqui -->
+            <a class="btn btn--ghost" href="assets/Curriculo-Willian-Ribeiro.pdf" download>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+              <span data-i18n="hero.cv">Baixar currículo (PDF)</span>
+            </a>
+          </div>
+
+          <p class="hero__code reveal" aria-hidden="true">
+            <span class="c-kw">var</span> stack = <span class="c-kw">new</span>[] { <span class="c-str">"C#"</span>, <span class="c-str">".NET"</span>, <span class="c-str">"SQL Server"</span> };
+          </p>
+        </div>
+
+        <!-- PERSONALIZE: foto de perfil (troque o arquivo em /assets mantendo o nome, ou ajuste o src) -->
+        <figure class="hero__photo reveal">
+          <img src="assets/willian-ribeiro.jpg" alt="Foto de Willian Ribeiro" data-i18n-attr="alt:hero.photo" width="864" height="1184" decoding="async">
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ 2. SOBRE ============ -->
+    <section class="section" id="sobre" aria-labelledby="sobre-titulo">
+      <div class="container">
+        <p class="section__tag reveal" data-i18n="about.tag">01 / Sobre</p>
+        <h2 class="section__title reveal" id="sobre-titulo" data-i18n="about.title">Código que resolve <em class="accent">problemas reais</em></h2>
+
+        <div class="about">
+          <div class="about__body">
+            <!-- PERSONALIZE: resumo profissional -->
+            <p class="about__text reveal" data-i18n="about.text">
+              Olá, eu sou o Willian. Trabalho com tecnologia há 9 anos: comecei em 2017 no suporte
+              técnico e, há quase 5 anos, sou desenvolvedor, sustentando e evoluindo sistemas
+              corporativos em C#, .NET e SQL Server. Sou formado em Engenharia da Computação.
+              Hoje, na PDVNet, evoluo um ERP com foco em documentos fiscais (NF-e, NFC-e e SPED Fiscal),
+              integração com marketplace e sincronismo entre matriz e filiais. Gosto de performance: já reduzi uma consulta crítica de cerca de 45 segundos para 4
+              e a geração de relatórios de 2 horas para 45 minutos. Também integro APIs REST,
+              automatizo processos e atuo no front-end com JavaScript, TypeScript e React.
+              Tenho conhecimento em infraestrutura e arquitetura de software e uso agentes
+              de IA, como Claude, Codex e Antigravity, no dia a dia de desenvolvimento.
+            </p>
+
+            <!-- PERSONALIZE: lado pessoal -->
+            <p class="about__text about__text--personal reveal" data-i18n="about.personal">
+              Sou apaixonado por novas tecnologias e vivo "brincando" de criar coisas: muitas vezes,
+              ferramentas para automatizar o meu próprio dia a dia, como o MonitorInput, que está aqui
+              nos projetos. Fora do código, a musculação e o jiu-jítsu são duas paixões da minha vida.
+              Nas horas livres, gosto de filmes e séries, de jogar e de ler, inclusive conteúdo técnico.
+            </p>
+
+            <!-- PERSONALIZE: interesses (cada <li> é um item) -->
+            <p class="chips-label reveal" data-i18n="about.hobbies">Fora do código</p>
+            <ul class="tags tags--loose reveal" data-i18n="about.hobbies.list">
+              <li>Musculação</li><li>Jiu-jítsu</li><li>Filmes e séries</li><li>Leitura</li><li>Games</li><li>Automações</li>
+            </ul>
+          </div>
+
+          <!-- PERSONALIZE: números de destaque -->
+          <ul class="stats" data-stagger>
+            <li class="stat reveal">
+              <span class="stat__value" data-i18n="stat1.value">Quase 5 anos</span>
+              <span class="stat__label" data-i18n="stat1.label">como desenvolvedor</span>
+            </li>
+            <li class="stat reveal">
+              <span class="stat__value" data-i18n="stat2.value">45s <span class="stat__arrow" aria-hidden="true">→</span><span class="visually-hidden">para</span> 4s</span>
+              <span class="stat__label" data-i18n="stat2.label">em uma consulta crítica de SQL Server</span>
+            </li>
+            <li class="stat reveal">
+              <span class="stat__value" data-i18n="stat3.value">2h <span class="stat__arrow" aria-hidden="true">→</span><span class="visually-hidden">para</span> 45min</span>
+              <span class="stat__label" data-i18n="stat3.label">na geração diária de relatórios</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. PROJETOS ============ -->
+    <section class="section" id="projetos" aria-labelledby="projetos-titulo">
+      <div class="container">
+        <p class="section__tag reveal" data-i18n="projects.tag">02 / Projetos</p>
+        <h2 class="section__title reveal" id="projetos-titulo" data-i18n="projects.title">Projetos que eu <em class="accent">construí</em></h2>
+
+        <!-- PERSONALIZE: PROJETOS EM DESTAQUE. Cada <article class="card"> é um projeto;
+             a grade tem 2 colunas, então mantenha um número par (4 ou 6) para ela fechar. Cada card abre com um vídeo curto (assets/projetos/*.mp4, sem som, em loop) e uma imagem
+             de capa (poster, .webp) mostrada antes de tocar e para quem prefere menos movimento.
+             Para trocar, substitua os arquivos mantendo os nomes. Sem vídeo, use uma imagem:
+             <img class="card__img" src="assets/nome-do-projeto.webp" alt="Tela do projeto" width="640" height="360" loading="lazy">
+             Lembre de traduzir os textos novos em js/i18n-en.js. -->
+        <div class="cards" data-stagger>
+
+          <!-- Destaque 1 -->
+          <article class="card reveal">
+            <video class="card__img card__video" muted loop playsinline preload="none" poster="assets/projetos/storecontrol.webp" width="1280" height="720" aria-label="Dashboard do StoreControl com vendas do dia, faturamento, ticket médio e produtos mais vendidos" data-i18n-attr="aria-label:p1.img">
+              <source src="assets/projetos/storecontrol.mp4" type="video/mp4">
+            </video>
+            <header class="card__head">
+              <svg class="card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></svg>
+              <span class="card__kind" data-i18n="p1.kind">Full stack · projeto de estudos</span>
+            </header>
+            <h3 class="card__title">StoreControl</h3>
+            <p class="card__desc" data-i18n="p1.desc">
+              Sistema de gestão de lojas em monólito modular: API ASP.NET Core com
+              Entity Framework Core e SQL Server, front-end em React e TypeScript,
+              cache em Redis e processamento pós-venda com RabbitMQ e Worker .NET.
+              Cobre estoque, compras, vendas e caixa, com testes de integração,
+              Docker Compose e OpenTelemetry.
+            </p>
+            <ul class="tags" aria-label="Tecnologias" data-i18n-attr="aria-label:tags.label">
+              <li>C#</li><li>ASP.NET Core</li><li>EF Core</li><li>SQL Server</li><li>React</li><li>RabbitMQ</li><li>Redis</li><li>Docker</li>
+            </ul>
+            <div class="card__links">
+              <a class="link" href="https://github.com/williancribeiro/StoreControl" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+                <span data-i18n="link.code">Código</span><span class="visually-hidden"> StoreControl (GitHub)</span>
+              </a>
+              <!-- Sem demo. Se houver, descomente:
+              <a class="link" href="https://..." target="_blank" rel="noopener">Demo</a> -->
+            </div>
+          </article>
+
+          <!-- Destaque 2 -->
+          <article class="card reveal">
+            <video class="card__img card__video" muted loop playsinline preload="none" poster="assets/projetos/monitorinput.webp" width="800" height="450" aria-label="Janela do MonitorInput com as portas DisplayPort, HDMI 1 e HDMI 2" data-i18n-attr="aria-label:p2.img">
+              <source src="assets/projetos/monitorinput.mp4" type="video/mp4">
+            </video>
+            <header class="card__head">
+              <svg class="card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v11H3zM8 20h8M12 16v4"/></svg>
+              <span class="card__kind" data-i18n="p2.kind">Utilitário Windows</span>
+            </header>
+            <h3 class="card__title">MonitorInput</h3>
+            <p class="card__desc" data-i18n="p2.desc">
+              Troca a entrada do monitor (DisplayPort ou HDMI) direto da bandeja do Windows
+              ou por atalho global, falando com o monitor via DDC/CI. Executável minúsculo,
+              sem dependências e com consumo de CPU zero quando ocioso.
+            </p>
+            <ul class="tags" aria-label="Tecnologias" data-i18n-attr="aria-label:tags.label">
+              <li>Rust</li><li>Win32 API</li><li>DDC/CI</li>
+            </ul>
+            <div class="card__links">
+              <a class="link" href="https://github.com/williancribeiro/MonitorInput" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+                <span data-i18n="link.code">Código</span><span class="visually-hidden"> MonitorInput (GitHub)</span>
+              </a>
+            </div>
+          </article>
+
+          <!-- Destaque 3 -->
+          <article class="card reveal">
+            <video class="card__img card__video" muted loop playsinline preload="none" poster="assets/projetos/pong.webp" width="1280" height="720" aria-label="Janelas do servidor e do cliente do Pong rodando lado a lado" data-i18n-attr="aria-label:p3.img">
+              <source src="assets/projetos/pong.mp4" type="video/mp4">
+            </video>
+            <header class="card__head">
+              <svg class="card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v10M20 7v10M12 3v2M12 9v2M12 15v2M15 13h.01"/></svg>
+              <span class="card__kind" data-i18n="p3.kind">Sistemas Distribuídos</span>
+            </header>
+            <h3 class="card__title" data-i18n="p3.title">Pong multiplayer em rede</h3>
+            <p class="card__desc" data-i18n="p3.desc">
+              O clássico Pong para dois jogadores em rede local, com arquitetura
+              cliente-servidor e comunicação via TCP/IP. Partidas em tempo real,
+              com pontuação automática e interface gráfica em SFML.
+            </p>
+            <ul class="tags" aria-label="Tecnologias" data-i18n-attr="aria-label:tags.label">
+              <li>C++</li><li>SFML</li><li>TCP/IP</li>
+            </ul>
+            <div class="card__links">
+              <a class="link" href="https://github.com/williancribeiro/pong-cpp" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+                <span data-i18n="link.code">Código</span><span class="visually-hidden"> Pong (GitHub)</span>
+              </a>
+            </div>
+          </article>
+
+          <!-- Destaque 4 -->
+          <article class="card reveal">
+            <video class="card__img card__video" muted loop playsinline preload="none" poster="assets/projetos/sistema-viagem.webp" width="900" height="506" aria-label="Tela do Sistema de Viagens com o cadastro de fiscais e a tabela vinda do banco de dados" data-i18n-attr="aria-label:p4.img">
+              <source src="assets/projetos/sistema-viagem.mp4" type="video/mp4">
+            </video>
+            <header class="card__head">
+              <svg class="card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v11H5zM5 11h14M8 16v2M16 16v2M8.500 13.500h.01M15.500 13.500h.01"/></svg>
+              <span class="card__kind" data-i18n="p4.kind">Programação Orientada a Objetos</span>
+            </header>
+            <h3 class="card__title" data-i18n="p4.title">Sistema de Viagens</h3>
+            <p class="card__desc" data-i18n="p4.desc">
+              Sistema de uma empresa de ônibus, com CRUD de motoristas, ônibus,
+              supervisores e viagens, relacionamentos entre as entidades e
+              persistência em banco de dados SQL.
+            </p>
+            <ul class="tags" aria-label="Tecnologias" data-i18n-attr="aria-label:tags.label">
+              <li>Java</li><li>SQL</li><li data-i18n="p4.tag">POO</li>
+            </ul>
+            <div class="card__links">
+              <a class="link" href="https://github.com/williancribeiro/sistema-viagem-java" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+                <span data-i18n="link.code">Código</span><span class="visually-hidden"> Sistema de Viagens (GitHub)</span>
+              </a>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- PERSONALIZE: OUTROS PROJETOS (lista compacta). Cada <li class="more__item"> é uma linha.
+             Sem repositório público? Troque o <a class="more__link"> por <span class="more__link">. -->
+        <h3 class="more-title reveal" data-i18n="more.title">Outros projetos e trabalhos acadêmicos</h3>
+        <ul class="more" data-stagger>
+          <li class="more__item reveal">
+            <a class="more__link" href="https://github.com/williancribeiro/WallpaperMinimalist" target="_blank" rel="noopener">
+              <span class="more__name">WallPicker</span>
+              <span class="more__desc" data-i18n="m1.desc">App desktop para buscar papéis de parede em 2K e 4K no Wallhaven e aplicá-los no Windows.</span>
+              <span class="more__tech">Rust · egui</span>
+            </a>
+          </li>
+          <li class="more__item reveal">
+            <span class="more__link">
+              <span class="more__name" data-i18n="m2.name">Previsão de ações com LSTM</span>
+              <span class="more__desc" data-i18n="m2.desc">TCC, nota 9,0: modelo de aprendizado de máquina para prever oscilações de preço de ações.</span>
+              <span class="more__tech">Python · LSTM</span>
+            </span>
+          </li>
+          <li class="more__item reveal">
+            <a class="more__link" href="https://github.com/williancribeiro/SistemaControleMercado" target="_blank" rel="noopener">
+              <span class="more__name" data-i18n="m3.name">Sistema de Controle de Mercado</span>
+              <span class="more__desc" data-i18n="m3.desc">Estoque e carrinho de compras pelo terminal, com structs, ponteiros e alocação dinâmica.</span>
+              <span class="more__tech">C</span>
+            </a>
+          </li>
+          <li class="more__item reveal">
+            <a class="more__link" href="https://github.com/williancribeiro/SistemasRH_Estrutura_de_dados_2_UVA" target="_blank" rel="noopener">
+              <span class="more__name" data-i18n="m4.name">Sistema de RH com árvore binária</span>
+              <span class="more__desc" data-i18n="m4.desc">CRUD de funcionários sobre uma árvore binária de busca ordenada por nome.</span>
+              <span class="more__tech">C</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 4. STACK ============ -->
+    <section class="section" id="stack" aria-labelledby="stack-titulo">
+      <div class="container">
+        <p class="section__tag reveal" data-i18n="stack.tag">03 / Stack técnica</p>
+        <h2 class="section__title reveal" id="stack-titulo" data-i18n="stack.title">Ferramentas do <em class="accent">dia a dia</em></h2>
+
+        <!-- PERSONALIZE: cada <li class="chip"> é uma tecnologia; o <span class="chip__glyph"> é a sigla -->
+        <ul class="chips" data-stagger>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">C#</span>C#</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">.N</span>.NET</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">{}</span>ASP.NET Core</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">DB</span>SQL Server</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">EF</span>Entity Framework</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">JS</span>JavaScript</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">&lt;&gt;</span>HTML/CSS</li>
+          <li class="chip reveal"><span class="chip__glyph" aria-hidden="true">git</span>Git</li>
+        </ul>
+
+        <p class="chips-label reveal" data-i18n="stack.also">Também trabalho com</p>
+        <ul class="tags tags--loose reveal" data-i18n="stack.also.list">
+          <li>TypeScript</li><li>React</li><li>APIs REST</li><li>Python</li><li>MySQL</li>
+          <li>Azure DevOps</li><li>CI/CD</li><li>Docker</li><li>Postman</li><li>PowerShell</li>
+          <li>Visual Basic</li><li>Talend Open Studio</li><li>Metodologias Ágeis</li>
+        </ul>
+
+        <!-- PERSONALIZE: conhecimentos em infraestrutura e arquitetura -->
+        <p class="chips-label reveal" data-i18n="stack.infra">Infraestrutura e arquitetura de software</p>
+        <ul class="tags tags--loose reveal" data-i18n="stack.infra.list">
+          <li>Infraestrutura de software</li><li>Arquitetura de software</li><li>Cliente-servidor</li>
+          <li>Linux</li><li>Hospedagem e DNS</li><li>Migração de bancos de dados</li>
+        </ul>
+
+        <!-- PERSONALIZE: agentes de IA que você usa -->
+        <p class="chips-label reveal" data-i18n="stack.ai">Agentes de IA</p>
+        <ul class="tags tags--loose reveal" data-i18n="stack.ai.list">
+          <li>Claude</li><li>Codex</li><li>Antigravity</li><li>e outros</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 5. EXPERIÊNCIA E FORMAÇÃO ============ -->
+    <section class="section" id="trajetoria" aria-labelledby="trajetoria-titulo">
+      <div class="container">
+        <p class="section__tag reveal" data-i18n="tl.tag">04 / Experiência e formação</p>
+        <h2 class="section__title reveal" id="trajetoria-titulo" data-i18n="tl.title">Minha <em class="accent">trajetória</em></h2>
+
+        <div class="journey">
+          <!-- PERSONALIZE: EXPERIÊNCIA PROFISSIONAL. Cada <li class="tl__item"> é um cargo, do mais recente ao mais antigo -->
+          <div class="journey__col">
+            <h3 class="journey__title reveal">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16v11H4zM9 8V5h6v3M4 13h16"/></svg>
+              <span data-i18n="tl.work">Experiência profissional</span>
+            </h3>
+            <ol class="tl">
+              <li class="tl__item tl__item--company tl__item--current reveal">
+                <div class="company">
+                  <div class="company__head">
+                    <h4 class="company__name">PDVNet</h4>
+                    <p class="company__meta"><time data-i18n="tl0.date">08/2026 – atual</time><span class="tl__badge" data-i18n="tl.now">Atual</span></p>
+                  </div>
+                  <ol class="roles">
+                    <li class="role role--top">
+                      <p class="role__meta"><span data-i18n="mode.hybrid">Híbrido</span></p>
+                      <h5 class="role__title" data-i18n="tl0.title">Desenvolvedor de Software</h5>
+                      <ul class="tl__list" data-i18n="tl0.list">
+                  <li>Implementei blocos do SPED Fiscal (C800, E200/E210 e 1601) e tratei rejeições da SEFAZ, criando validações fiscais para NF-e e NFC-e.</li>
+                  <li>Desenvolvi a geração de NF-e a partir da pré-venda e o DANFE simplificado, agilizando o fluxo de faturamento.</li>
+                  <li>Integrei o ERP a marketplace, conectando a operação de vendas online ao sistema.</li>
+                  <li>Corrigi e aprimorei o sincronismo entre matriz e filiais (PDVSync), garantindo a consistência dos dados entre unidades.</li>
+                  <li>Otimizei consultas SQL de relatórios gerenciais (DRE, metas e comissões), melhorando o desempenho das análises.</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+
+              <!-- PERSONALIZE: empresa com mais de um cargo. Cada <li class="role"> é um cargo, do mais recente ao mais antigo;
+                   o selo "Promoção" vai em todos, menos no primeiro cargo da empresa. -->
+              <li class="tl__item tl__item--company reveal">
+                <div class="company">
+                  <div class="company__head">
+                    <h4 class="company__name">Capemisa Seguradora</h4>
+                    <p class="company__meta"><time>03/2022 – 07/2026</time><span aria-hidden="true">·</span><span data-i18n="co1.dur">4 anos e 5 meses</span></p>
+                    <p class="company__path"><span data-i18n="co1.from">Estagiário</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span data-i18n="co1.to">Desenvolvedor</span></p>
+                  </div>
+                  <ol class="roles">
+                    <li class="role role--top">
+                      <p class="role__meta"><span class="role__promo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span data-i18n="tl.promo">Promoção</span></span><time>03/2024 – 07/2026</time></p>
+                      <h5 class="role__title" data-i18n="tl1.title">Desenvolvedor de Software</h5>
+                      <ul class="tl__list" data-i18n="tl1.list">
+                        <li>Otimizei uma consulta crítica diária em SQL Server de ~45s para ~4s, reduzindo a geração de relatórios de ~2h para ~45min.</li>
+                        <li>Criei uma procedure que monitora 4 automações diárias do Talend Open Studio (início, fim, status e detalhes de falha), dando à equipe de Sistemas de TI visibilidade centralizada das execuções.</li>
+                        <li>Integrei uma API em C#/.NET a uma nova base de dados para relatórios consolidados usados por áreas de toda a empresa, como Atuarial e Operacional.</li>
+                        <li>Atuei em demandas full stack com JavaScript, TypeScript e React, usando Git, Azure DevOps e CI/CD.</li>
+                      </ul>
+                    </li>
+                    <li class="role">
+                      <p class="role__meta"><time>03/2022 – 03/2024</time></p>
+                      <h5 class="role__title" data-i18n="tl2.title">Estagiário de Desenvolvimento</h5>
+                      <ul class="tl__list" data-i18n="tl2.list">
+                        <li>Apoiei a geração de relatórios operacionais em SQL Server, criando e ajustando consultas e rotinas.</li>
+                        <li>Sustentei sistemas internos em C#/.NET, resolvendo em média 5 tickets por semana (cerca de 10 em fechamento contábil), com foco em correção de bugs.</li>
+                        <li>Testei e validei correções e pequenas melhorias, ajudando a reduzir a recorrência de incidentes.</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+
+              <li class="tl__item tl__item--company reveal">
+                <div class="company">
+                  <div class="company__head">
+                    <h4 class="company__name">Hostnet Internet</h4>
+                    <p class="company__meta"><time>10/2018 – 03/2022</time><span aria-hidden="true">·</span><span data-i18n="co2.dur">3 anos e 6 meses</span></p>
+                    <p class="company__path"><span data-i18n="co2.from">Estagiário</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span data-i18n="co2.mid">Júnior</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span data-i18n="co2.to">Analista</span></p>
+                  </div>
+                  <ol class="roles">
+                    <li class="role role--top">
+                      <p class="role__meta"><span class="role__promo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span data-i18n="tl.promo">Promoção</span></span><time>06/2021 – 03/2022</time><span class="role__mode" data-i18n="mode.hybrid">Híbrido</span></p>
+                      <h5 class="role__title" data-i18n="h1.title">Analista de Suporte</h5>
+                      <ul class="tl__list" data-i18n="h1.list">
+                        <li>Prestei suporte técnico em ambientes WordPress, MySQL e Linux, com 15 a 20 atendimentos por dia.</li>
+                        <li>Administrei e otimizei bancos de dados MySQL e conduzi migrações de sites, bases de dados e DNS.</li>
+                        <li>Monitorei servidores e serviços hospedados, diagnosticando e solucionando incidentes.</li>
+                        <li>Documentei procedimentos e orientei clientes.</li>
+                      </ul>
+                      <p class="role__results-label" data-i18n="tl.results">Resultados</p>
+                      <ul class="tl__list tl__list--results" data-i18n="h1.res">
+                        <li>Redução de cerca de 20% dos chamados críticos, com diagnósticos mais eficientes.</li>
+                        <li>Mais estabilidade nos ambientes, com a otimização de sites e bancos de dados.</li>
+                      </ul>
+                    </li>
+                    <li class="role">
+                      <p class="role__meta"><span class="role__promo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span data-i18n="tl.promo">Promoção</span></span><time>09/2019 – 06/2021</time><span class="role__mode" data-i18n="mode.hybrid">Híbrido</span></p>
+                      <h5 class="role__title" data-i18n="h2.title">Suporte Técnico Júnior</h5>
+                      <ul class="tl__list" data-i18n="h2.list">
+                        <li>Atendi clientes e dei suporte à hospedagem de aplicações.</li>
+                        <li>Executei migrações de sites e bancos de dados.</li>
+                        <li>Identifiquei e corrigi falhas em ambientes web.</li>
+                        <li>Auxiliei na manutenção preventiva dos servidores.</li>
+                      </ul>
+                      <p class="role__results-label" data-i18n="tl.results">Resultados</p>
+                      <ul class="tl__list tl__list--results" data-i18n="h2.res">
+                        <li>Aumento da taxa de resolução já no primeiro atendimento.</li>
+                        <li>Mais disponibilidade dos serviços hospedados, com monitoramento preventivo.</li>
+                      </ul>
+                    </li>
+                    <li class="role">
+                      <p class="role__meta"><time>10/2018 – 09/2019</time><span class="role__mode" data-i18n="mode.onsite">Presencial</span></p>
+                      <h5 class="role__title" data-i18n="h3.title">Estagiário de Suporte Técnico</h5>
+                      <ul class="tl__list" data-i18n="h3.list">
+                        <li>Auxiliei no atendimento a clientes de hospedagem e apoiei a equipe técnica na resolução de chamados.</li>
+                        <li>Apoiei a manutenção de bancos MySQL e o monitoramento de servidores.</li>
+                        <li>Realizei testes e validações de aplicações.</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+
+              <li class="tl__item tl__item--company reveal">
+                <div class="company">
+                  <div class="company__head">
+                    <h4 class="company__name">Pipeway Engenharia</h4>
+                    <p class="company__meta"><time>08/2017 – 10/2018</time><span aria-hidden="true">·</span><span data-i18n="co3.dur">1 ano e 3 meses</span></p>
+                  </div>
+                  <ol class="roles">
+                    <li class="role">
+                      <p class="role__meta"><span data-i18n="mode.onsite">Presencial</span></p>
+                      <h5 class="role__title" data-i18n="tl6.title">Suporte Técnico (estágio)</h5>
+                      <ul class="tl__list" data-i18n="tl6.list">
+                        <li>Dei suporte a usuários em sistemas operacionais Windows e Linux.</li>
+                        <li>Configurei hardware, software, rede e servidores.</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <!-- PERSONALIZE: FORMAÇÃO ACADÊMICA -->
+          <div class="journey__col">
+            <h3 class="journey__title journey__title--edu reveal">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5zM6 11v5c2 2 10 2 12 0v-5M22 9v6"/></svg>
+              <span data-i18n="tl.education">Formação acadêmica</span>
+            </h3>
+            <ol class="tl tl--edu">
+              <li class="tl__item tl__item--company reveal">
+                <div class="company company--edu">
+                  <div class="company__head">
+                    <h4 class="company__name">Universidade Veiga de Almeida</h4>
+                    <p class="company__meta"><time>08/2018 – 12/2023</time></p>
+                  </div>
+                  <ol class="roles">
+                    <li class="role role--top">
+                      <p class="role__meta"><span data-i18n="edu.degree">Graduação</span></p>
+                      <h5 class="role__title" data-i18n="tl3.title">Bacharelado em Engenharia da Computação</h5>
+                      <ul class="tl__list" data-i18n="tl3.list">
+                        <li>TCC: algoritmo de aprendizado de máquina (LSTM) para prever oscilações de ações. Nota 9,0.</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+
+              <li class="tl__item tl__item--company reveal">
+                <div class="company company--edu">
+                  <div class="company__head">
+                    <h4 class="company__name">Colégio Santo Inácio</h4>
+                    <p class="company__meta"><time>07/2016 – 06/2018</time></p>
+                  </div>
+                  <ol class="roles">
+                    <li class="role">
+                      <p class="role__meta"><span data-i18n="edu.technical">Curso técnico</span></p>
+                      <h5 class="role__title" data-i18n="tl5.title">Técnico em Informática</h5>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. CONTATO ============ -->
+    <section class="section section--contact" id="contato" aria-labelledby="contato-titulo">
+      <div class="container">
+        <p class="section__tag reveal" data-i18n="contact.tag">05 / Contato</p>
+        <h2 class="section__title reveal" id="contato-titulo" data-i18n="contact.title">Vamos <em class="accent">conversar?</em></h2>
+        <p class="contact__lead reveal" data-i18n="contact.lead">
+          Estou aberto a oportunidades como desenvolvedor .NET, em modelo presencial,
+          híbrido ou remoto. A forma mais rápida de falar comigo é por e-mail.
+        </p>
+
+        <!-- PERSONALIZE: e-mail, LinkedIn e GitHub -->
+        <ul class="contact" data-stagger>
+          <li class="reveal">
+            <a class="contact__item" href="mailto:willian96_silva@hotmail.com">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6"/></svg>
+              <span><span class="contact__label" data-i18n="contact.email">E-mail</span>willian96_silva@hotmail.com</span>
+            </a>
+          </li>
+          <li class="reveal">
+            <a class="contact__item" href="https://www.linkedin.com/in/willianribeiroti" target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h3v11H4zM5.500 4.500v.01M11 20V9h3v2c.800-1.400 2-2.200 3.500-2.200 2.300 0 3.500 1.500 3.500 4.200v7h-3v-6.300c0-1.400-.600-2.200-1.800-2.200-1.300 0-2.200.900-2.200 2.500v6z"/></svg>
+              <span><span class="contact__label">LinkedIn</span>in/willianribeiroti</span>
+            </a>
+          </li>
+          <li class="reveal">
+            <a class="contact__item" href="https://github.com/williancribeiro" target="_blank" rel="noopener">
+              <svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>
+              <span><span class="contact__label">GitHub</span>williancribeiro</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 7. RODAPÉ ============ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>© <span id="ano">2026</span> Willian Ribeiro</p>
+      <p class="footer__mono" data-i18n="footer.made">Feito com HTML, CSS e JavaScript puro</p>
+    </div>
+  </footer>
+
+  <script src="js/i18n-en.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>
