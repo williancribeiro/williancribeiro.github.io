@@ -15,6 +15,8 @@ window.I18N_EN = {
   'nav.projects': 'Projects',
   'nav.journey': 'Journey',
   'nav.contact': 'Contact',
+  'ruler.label': 'Section navigation',
+  'ruler.top': 'Home',
   'lang.label': 'Language',
   'menu.open': 'Open menu',
   'menu.close': 'Close menu',
@@ -28,6 +30,8 @@ window.I18N_EN = {
   'hero.cta': 'View projects',
   'hero.cv': 'Download résumé (PDF, in Portuguese)',
   'hero.photo': 'Photo of Willian Ribeiro',
+  'hero.scroll': 'Scroll',
+  'hero.scrollLabel': 'Scroll to about section',
 
   /* Sobre */
   'about.tag': '01 / About',
