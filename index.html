@@ -66,6 +66,7 @@
             <li><a class="nav__link" href="#projetos" data-i18n="nav.projects">Projetos</a></li>
             <li><a class="nav__link" href="#stack">Stack</a></li>
             <li><a class="nav__link" href="#trajetoria" data-i18n="nav.journey">Trajetória</a></li>
+            <li><a class="nav__link" href="#certificados" data-i18n="nav.certificates">Certificados</a></li>
             <li><a class="nav__link nav__link--cta" href="#contato" data-i18n="nav.contact">Contato</a></li>
           </ul>
         </nav>
@@ -106,6 +107,10 @@
       <span class="ruler__label" data-i18n="nav.journey">Trajetória</span>
       <span class="ruler__tick" aria-hidden="true"></span>
     </a>
+    <a class="ruler__item" href="#certificados" data-section="certificados">
+      <span class="ruler__label" data-i18n="nav.certificates">Certificados</span>
+      <span class="ruler__tick" aria-hidden="true"></span>
+    </a>
     <a class="ruler__item" href="#contato" data-section="contato">
       <span class="ruler__label" data-i18n="nav.contact">Contato</span>
       <span class="ruler__tick" aria-hidden="true"></span>
@@ -136,7 +141,7 @@
           <div class="hero__actions reveal">
             <a class="btn btn--primary" href="#projetos" data-i18n="hero.cta">Ver projetos</a>
             <!-- PERSONALIZE: troque o arquivo em /assets e ajuste o nome aqui -->
-            <a class="btn btn--ghost" href="assets/Curriculo-Willian-Ribeiro.pdf" download>
+            <a class="btn btn--ghost" href="assets/Curriculo-Willian-Ribeiro.pdf" data-i18n-attr="href:hero.cvFile" download>
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
               <span data-i18n="hero.cv">Baixar currículo (PDF)</span>
             </a>
@@ -604,10 +609,45 @@
       </div>
     </section>
 
-    <!-- ============ 6. CONTATO ============ -->
+    <section class="section" id="certificados" aria-labelledby="certificados-titulo">
+      <div class="container">
+        <p class="section__tag reveal" data-i18n="cert.tag">05 / Formação complementar</p>
+        <h2 class="section__title reveal" id="certificados-titulo" data-i18n="nav.certificates">Certificados</h2>
+        <!-- PERSONALIZE: as imagens são prévias. Cada link abre a credencial original. -->
+        <div class="cards" data-stagger>
+          <a class="cert-card reveal" href="https://balta.io/certificates/b74dc268-f497-4056-bb4c-aecce193c814" target="_blank" rel="noopener">
+            <img src="assets/certificados/dotnet.webp" alt="" width="1290" height="917" loading="lazy" decoding="async">
+            <div class="cert-info">
+              <span class="cert-meta">balta.io · 16 h 17 min</span>
+              <h3 class="card__title">.NET Developer Fundamentals</h3>
+              <span class="cert-action"><span data-i18n="cert.verify">Ver certificado</span> <span aria-hidden="true">↗</span></span>
+            </div>
+          </a>
+          <a class="cert-card reveal" href="https://balta.io/certificates/a1f36a5a-8e6b-4486-b826-c532e3f300e5" target="_blank" rel="noopener">
+            <img src="assets/certificados/csharp.webp" alt="" width="1290" height="917" loading="lazy" decoding="async">
+            <div class="cert-info">
+              <span class="cert-meta">balta.io · 12 h 9 min</span>
+              <h3 class="card__title" data-i18n="cert.csharp">Fundamentos do C#</h3>
+              <span class="cert-action"><span data-i18n="cert.verify">Ver certificado</span> <span aria-hidden="true">↗</span></span>
+            </div>
+          </a>
+        </div>
+        <h3 class="more-title reveal" data-i18n="cert.more">Outros certificados</h3>
+        <ul class="more">
+          <li class="more__item reveal">
+            <a class="cert-row" href="https://balta.io/certificates/db4054bd-fe62-4624-9b00-8bbfb2399a54" target="_blank" rel="noopener">
+              <span class="more__name" data-i18n="cert.oop">Fundamentos da Orientação a Objetos</span>
+              <span class="cert-meta">balta.io · 4 h 8 min <span aria-hidden="true">↗</span></span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ CONTATO ============ -->
     <section class="section section--contact" id="contato" aria-labelledby="contato-titulo">
       <div class="container">
-        <p class="section__tag reveal" data-i18n="contact.tag">05 / Contato</p>
+        <p class="section__tag reveal" data-i18n="contact.tag">06 / Contato</p>
         <h2 class="section__title reveal" id="contato-titulo" data-i18n="contact.title">Vamos <em class="accent">conversar?</em></h2>
         <p class="contact__lead reveal" data-i18n="contact.lead">
           Estou aberto a oportunidades como desenvolvedor .NET, em modelo presencial,

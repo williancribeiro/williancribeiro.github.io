@@ -307,7 +307,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .nav__link:hover, .nav__link.is-active { color: var(--text); background: rgba(255, 255, 255, 0.05); }
 
-@media (min-width: 800px) {
+@media (min-width: 960px) {
   .nav-toggle { display: none; }
   .nav {
     position: static;
@@ -992,6 +992,31 @@ html:not(.js) .section__tag::before { transform: scaleX(1); }
 .card__note { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); min-height: 32px; display: inline-flex; align-items: center; }
 
 /* Outros projetos (lista compacta — interação inspirada no Fable /) */
+.cert-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.cert-card:hover, .cert-card:focus-visible { border-color: var(--accent-1); }
+.cert-card img { width: 100%; height: auto; }
+.cert-info { padding: clamp(18px, 3vw, 30px); display: grid; gap: 8px; }
+.cert-meta { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); }
+.cert-action { color: var(--accent-1); font-weight: 600; }
+.cert-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 18px 12px;
+  color: var(--text);
+}
+.cert-row:hover, .cert-row:focus-visible { background: var(--surface-2); }
+
 .more-title {
   margin: 64px 0 8px;
   font-family: var(--font-mono);
