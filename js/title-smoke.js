@@ -65,21 +65,25 @@
     '  clip.y = -clip.y;',
     '  gl_Position = vec4(clip, 0.0, 1.0);',
     '',
-    '  /* Ao virar fumaça, tinge sutilmente com o verde-água/índigo da paleta */',
+    '  /* Preserva 100% das cores originais em repouso (#e9eef6, #9aa8bc, gradiente #5eead4 -> #818cf8) */',
+    '  /* Quando vira fumaça, adiciona leve véu da paleta nas letras neutras sem lavar o gradiente */',
+    '  float sat = max(a_col.r, max(a_col.g, a_col.b)) - min(a_col.r, min(a_col.g, a_col.b));',
+    '  float isNeutral = 1.0 - smoothstep(0.08, 0.25, sat);',
     '  vec3 mistCol = mix(vec3(0.369, 0.918, 0.831), vec3(0.506, 0.549, 0.973), a_seed.x);',
-    '  vec3 col = mix(a_col, mistCol, smoke * 0.62);',
-    '  /* Clarão luminoso suave durante a explosão nebulosa */',
-    '  vec3 coreBright = mix(vec3(0.86, 0.99, 0.97), vec3(0.92, 0.94, 1.0), a_seed.x);',
-    '  v_col = mix(col, coreBright, u_flash * 0.58 * smoke);',
+    '  vec3 col = mix(a_col, mistCol, smoke * 0.42 * isNeutral);',
+    '  /* Realce luminoso sutil na crista da fumaça e durante a explosão sem estourar para branco */',
+    '  vec3 glowLift = mix(col, min(col * 1.28 + mistCol * 0.14, vec3(1.0)), smoke * 0.45);',
+    '  vec3 flashCol = mix(glowLift, mix(glowLift, mistCol * 1.18 + vec3(0.18), 0.55), u_flash * smoke);',
+    '  v_col = clamp(flashCol, 0.0, 1.0);',
     '  v_smoke = smoke;',
     '',
-    '  /* Grãos densos e nítidos nas letras; partículas maiores e suaves quando fumaça */',
-    '  float baseSize = (1.5 + a_seed.y * 1.15) * (1.0 + smoke * (2.15 + u_flash * 1.05));',
-    '  gl_PointSize = clamp(baseSize * u_dpr, 1.4, 13.0 * u_dpr);',
+    '  /* Grãos densos e luminosos nas letras (equiparando brilho ao texto sólido); suaves quando fumaça */',
+    '  float baseSize = (1.7 + a_seed.y * 1.15) * (1.0 + smoke * (2.0 + u_flash * 0.95));',
+    '  gl_PointSize = clamp(baseSize * u_dpr, 1.5, 12.5 * u_dpr);',
     '',
-    '  float grainAlpha = 0.72 + a_seed.y * 0.24;',
-    '  float smokeAlpha = 0.26 + u_flash * 0.20;',
-    '  v_alpha = mix(grainAlpha, smokeAlpha, smoke * 0.84) * u_fade;',
+    '  float grainAlpha = 0.88 + a_seed.y * 0.12;',
+    '  float smokeAlpha = 0.36 + u_flash * 0.24;',
+    '  v_alpha = mix(grainAlpha, smokeAlpha, smoke * 0.82) * u_fade;',
     '}'
   ].join('\n');
 
@@ -94,7 +98,7 @@
     '  float d = length(c);',
     '  if (d > 0.5) discard;',
     '  float core = smoothstep(0.5, 0.0, d);',
-    '  float softness = mix(1.35, 2.75, v_smoke);',
+    '  float softness = mix(0.85, 2.65, v_smoke);',
     '  float a = pow(core, softness) * v_alpha;',
     '  gl_FragColor = vec4(v_col, a);',
     '}'
@@ -137,7 +141,8 @@
   var bufSeed = gl.createBuffer();
 
   gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  /* Alpha blending padrão preserva o gradiente #5eead4 -> #818cf8 e o #9aa8bc sem lavar para branco */
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.clearColor(0, 0, 0, 0);
 
   /* ---------- PRNG rápido ---------- */
@@ -177,13 +182,14 @@
     lastMove: 0
   };
 
-  /* Estado do pincel autônomo ("rodando" suavemente pelo nome quando ocioso) */
+  /* Estado do pincel autônomo ("rodando" em ciclos espaçados quando ocioso) */
   var autoOrb = {
     x: 0,
     y: 0,
     prevX: 0,
     prevY: 0,
     strength: 0,
+    idleTime: 0,
     initialized: false
   };
 
@@ -261,13 +267,14 @@
         var gy0 = (ar.top - titleRect.top) * SAMPLE_SCALE;
         var gy1 = (ar.bottom - titleRect.top) * SAMPLE_SCALE;
         var grad = ctx.createLinearGradient(gx0, gy0, gx1, gy0 + (gy1 - gy0) * 0.18);
-        grad.addColorStop(0, '#5eead4');
-        grad.addColorStop(1, '#818cf8');
+        grad.addColorStop(0, '#6bf3de');
+        grad.addColorStop(0.5, '#78cef2');
+        grad.addColorStop(1, '#8f9bff');
         fillStyle = grad;
       } else if (isRole) {
-        fillStyle = '#adbcd0';
+        fillStyle = '#a8b6ca';
       } else {
-        fillStyle = '#eef3fa';
+        fillStyle = '#f3f7fd';
       }
       ctx.fillStyle = fillStyle;
       ctx.strokeStyle = fillStyle;
@@ -582,14 +589,31 @@
     var targetPtrStrength = pointerShouldPull ? 1 : 0;
     pointer.strength += (targetPtrStrength - pointer.strength) * (1 - Math.exp(-dt * (pointerShouldPull ? 14 : 4.2)));
 
-    /* Pincel autônomo ("efeito rodando") assume suavemente quando o mouse está parado ou fora (e no mobile) */
+    /* Pincel autônomo ("efeito rodando") com ciclos espaçados:
+       ~2,4s de espera inicial, ~4,2s de passagem suave pelas letras e ~5,4s de pausa entre passagens */
     var autoAllowed = elapsed > 1.35 && pointer.strength < 0.25 && explosionHold < 0.15;
-    var targetAutoStrength = autoAllowed ? 1 : 0;
-    autoOrb.strength += (targetAutoStrength - autoOrb.strength) * (1 - Math.exp(-dt * (autoAllowed ? 2.4 : 8.0)));
+    var autoEnvelope = 0;
+    if (autoAllowed) {
+      autoOrb.idleTime += dt;
+      var cycleDur = 9.6;   // duração total do ciclo (4,2s ativo + 5,4s descanso)
+      var activeDur = 4.2;  // duração de cada passagem pelo nome
+      var initialWait = 2.4;
+      if (autoOrb.idleTime > initialWait) {
+        var phaseTime = (autoOrb.idleTime - initialWait) % cycleDur;
+        if (phaseTime < activeDur) {
+          var pNorm = phaseTime / activeDur;
+          /* Envelope suave (entra e sai sem cortes bruscos) */
+          autoEnvelope = Math.sin(pNorm * Math.PI);
+        }
+      }
+    } else {
+      autoOrb.idleTime = 0;
+    }
+    autoOrb.strength += (autoEnvelope - autoOrb.strength) * (1 - Math.exp(-dt * (autoEnvelope > 0 ? 4.5 : 7.5)));
 
     /* Trajetória orgânica em figura-8 / órbita atravessando o nome e o cargo */
-    var orbT = elapsed * 0.62;
-    var targetAx = PAD + textW * (0.5 + 0.44 * Math.sin(orbT));
+    var orbT = elapsed * 0.48;
+    var targetAx = PAD + textW * (0.5 + 0.45 * Math.sin(orbT));
     var targetAy = PAD + textH * (0.5 + 0.35 * Math.sin(orbT * 2.0 + 0.75));
     if (!autoOrb.initialized) {
       autoOrb.x = targetAx;
