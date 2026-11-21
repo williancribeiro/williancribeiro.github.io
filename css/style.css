@@ -571,6 +571,9 @@ img { max-width: 100%; height: auto; display: block; }
 .hero__title.has-particle-title,
 .hero__title.has-particle-title .hero__role {
   color: transparent;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .hero__title.has-particle-title .accent {
   background: none;
@@ -579,9 +582,9 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .hero__title-canvas {
   position: absolute;
-  inset: -150px;
-  width: calc(100% + 300px);
-  height: calc(100% + 300px);
+  inset: calc(var(--pad, 180px) * -1);
+  width: calc(100% + var(--pad, 180px) * 2);
+  height: calc(100% + var(--pad, 180px) * 2);
   pointer-events: none;
   z-index: 3;
 }

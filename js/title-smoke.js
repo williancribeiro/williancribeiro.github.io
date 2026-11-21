@@ -3,10 +3,13 @@
    Inspirado no título interativo "Fable 5.2" de fable.sparo.com.br:
    - Rasteriza o <h1> real ("Willian Ribeiro" + "Desenvolvedor Full Stack")
      respeitando exatamente as fontes carregadas, tamanhos, quebras e cores
-   - Ao passar o mouse, abre um rastro fluido com turbulência em vórtice
-     transformando os grãos nítidos em fumaça luminosa que retorna suavemente
-   - Reage à troca de idioma (PT/EN), redimensionamento e clique
-   - Pausa fora da viewport / aba oculta e respeita prefers-reduced-motion
+   - Desktop (mouse): rastro de fumaça na ponta da seta; ao ficar parado o
+     ponteiro fecha e uma onda autônoma continua "rodando" suavemente pelo nome
+   - Canto superior esquerdo (desktop): explosão nebulosa luminosa que depois
+     se reconstrói suavemente nas letras
+   - Celular (Opção B): onda autônoma contínua + rajada orgânica no toque
+     rápido (sem conflito com rolagem e sem travar círculo aberto)
+   - Reage à troca de idioma (PT/EN), largura da tela e prefers-reduced-motion
    ========================================================================== */
 (function () {
   'use strict';
@@ -29,9 +32,8 @@
 
   if (!gl) return;
 
-  /* Margem generosa ao redor do <h1> para a fumaça expandir livremente sem cortar */
-  var PAD = 150;
   var SAMPLE_SCALE = 2;
+  var PAD = window.innerWidth >= 900 ? 190 : 120;
 
   /* ---------- Shaders WebGL ---------- */
   var VERT_SRC = [
@@ -44,6 +46,7 @@
     'uniform float u_dpr;',
     'uniform float u_time;',
     'uniform float u_fade;',
+    'uniform float u_flash;',  // brilho nebuloso durante explosão
     '',
     'varying vec3 v_col;',
     'varying float v_alpha;',
@@ -64,15 +67,19 @@
     '',
     '  /* Ao virar fumaça, tinge sutilmente com o verde-água/índigo da paleta */',
     '  vec3 mistCol = mix(vec3(0.369, 0.918, 0.831), vec3(0.506, 0.549, 0.973), a_seed.x);',
-    '  v_col = mix(a_col, mistCol, smoke * 0.62);',
+    '  vec3 col = mix(a_col, mistCol, smoke * 0.62);',
+    '  /* Clarão luminoso suave durante a explosão nebulosa */',
+    '  vec3 coreBright = mix(vec3(0.86, 0.99, 0.97), vec3(0.92, 0.94, 1.0), a_seed.x);',
+    '  v_col = mix(col, coreBright, u_flash * 0.58 * smoke);',
     '  v_smoke = smoke;',
     '',
-    '  /* Grãos densos e nítidos nas letras; partículas mais largas e suaves quando fumaça */',
-    '  float baseSize = (1.5 + a_seed.y * 1.15) * (1.0 + smoke * 2.15);',
-    '  gl_PointSize = clamp(baseSize * u_dpr, 1.4, 11.5 * u_dpr);',
+    '  /* Grãos densos e nítidos nas letras; partículas maiores e suaves quando fumaça */',
+    '  float baseSize = (1.5 + a_seed.y * 1.15) * (1.0 + smoke * (2.15 + u_flash * 1.05));',
+    '  gl_PointSize = clamp(baseSize * u_dpr, 1.4, 13.0 * u_dpr);',
     '',
     '  float grainAlpha = 0.72 + a_seed.y * 0.24;',
-    '  v_alpha = mix(grainAlpha, 0.26, smoke * 0.84) * u_fade;',
+    '  float smokeAlpha = 0.26 + u_flash * 0.20;',
+    '  v_alpha = mix(grainAlpha, smokeAlpha, smoke * 0.84) * u_fade;',
     '}'
   ].join('\n');
 
@@ -123,6 +130,7 @@
   var uDpr = gl.getUniformLocation(program, 'u_dpr');
   var uTime = gl.getUniformLocation(program, 'u_time');
   var uFade = gl.getUniformLocation(program, 'u_fade');
+  var uFlash = gl.getUniformLocation(program, 'u_flash');
 
   var bufDyn = gl.createBuffer();
   var bufCol = gl.createBuffer();
@@ -148,24 +156,45 @@
   var colData = null;
   var seedData = null;
 
+  var textW = 1;
+  var textH = 1;
   var canvasW = 1;
   var canvasH = 1;
   var dpr = 1;
   var inView = true;
   var mounted = false;
   var fadeIn = 0;
+  var lastWidth = window.innerWidth;
 
-  /* Estado do ponteiro em coordenadas locais do canvas */
+  /* Estado do ponteiro (apenas mouse/caneta — touch usa Opção B) */
   var pointer = {
     x: -9999,
     y: -9999,
-    prevX: -9999,
-    prevY: -9999,
     vx: 0,
     vy: 0,
     active: false,
+    strength: 0,
     lastMove: 0
   };
+
+  /* Estado do pincel autônomo ("rodando" suavemente pelo nome quando ocioso) */
+  var autoOrb = {
+    x: 0,
+    y: 0,
+    prevX: 0,
+    prevY: 0,
+    strength: 0,
+    initialized: false
+  };
+
+  /* Estado da explosão nebulosa (canto superior esquerdo) */
+  var explosionFlash = 0;
+  var explosionHold = 0;
+  var inTopLeftZone = false;
+  var lastExplosionAt = 0;
+
+  /* Estado de toque rápido no celular (Opção B — ignora arrastes/rolagem) */
+  var touchTap = null;
 
   /* ---------- Amostragem pixel-a-pixel do texto real do <h1> ---------- */
   function collectTextNodes(root, out) {
@@ -184,17 +213,22 @@
     var titleRect = titleEl.getBoundingClientRect();
     if (titleRect.width < 10 || titleRect.height < 10) return;
 
+    var isDesktop = window.innerWidth >= 900;
+    PAD = isDesktop ? 190 : 120;
+    canvas.style.setProperty('--pad', PAD + 'px');
+
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvasW = Math.ceil(titleRect.width + PAD * 2);
-    canvasH = Math.ceil(titleRect.height + PAD * 2);
+    textW = titleRect.width;
+    textH = titleRect.height;
+    canvasW = Math.ceil(textW + PAD * 2);
+    canvasH = Math.ceil(textH + PAD * 2);
 
     canvas.width = Math.max(1, Math.floor(canvasW * dpr));
     canvas.height = Math.max(1, Math.floor(canvasH * dpr));
     gl.viewport(0, 0, canvas.width, canvas.height);
 
-    /* Canvas 2D offscreen exatamente do tamanho do <h1> em alta resolução */
-    var offW = Math.max(1, Math.ceil(titleRect.width * SAMPLE_SCALE));
-    var offH = Math.max(1, Math.ceil(titleRect.height * SAMPLE_SCALE));
+    var offW = Math.max(1, Math.ceil(textW * SAMPLE_SCALE));
+    var offH = Math.max(1, Math.ceil(textH * SAMPLE_SCALE));
     var off = document.createElement('canvas');
     off.width = offW;
     off.height = offH;
@@ -206,7 +240,6 @@
     collectTextNodes(titleEl, textNodes);
     var range = document.createRange();
 
-    /* Desenha cada caractere exatamente na coordenada medida pelo layout do navegador */
     for (var n = 0; n < textNodes.length; n++) {
       var node = textNodes[n];
       var parentEl = node.parentElement;
@@ -238,7 +271,6 @@
       }
       ctx.fillStyle = fillStyle;
       ctx.strokeStyle = fillStyle;
-      /* Micro-reforço para que o Manrope weight 200 tenha densidade rica em partículas */
       ctx.lineWidth = (isAccent ? 0.35 : 0.65) * SAMPLE_SCALE;
       ctx.lineJoin = 'round';
 
@@ -279,7 +311,6 @@
     var totalPixels = candidates.length / 6;
     if (totalPixels < 20) return;
 
-    var isDesktop = window.innerWidth >= 900;
     var targetCount = isDesktop ? 34000 : 14000;
     var newCount = Math.min(targetCount, Math.max(totalPixels, Math.floor(targetCount * 0.88)));
 
@@ -296,9 +327,9 @@
     colData = new Float32Array(count * 3);
     seedData = new Float32Array(count * 2);
 
-    var step = totalPixels / count;
+    var stepRatio = totalPixels / count;
     for (var i = 0; i < count; i++) {
-      var idx = Math.floor((i * step + rand() * Math.max(step, 1)) % totalPixels) * 6;
+      var idx = Math.floor((i * stepRatio + rand() * Math.max(stepRatio, 1)) % totalPixels) * 6;
       var gx = candidates[idx] / SAMPLE_SCALE + (rand() - 0.5) * 0.75 + PAD;
       var gy = candidates[idx + 1] / SAMPLE_SCALE + (rand() - 0.5) * 0.75 + PAD;
 
@@ -312,7 +343,6 @@
         vx[i] = (prevVx[oldI] || 0) + (rand() - 0.5) * 2.5;
         vy[i] = (prevVy[oldI] || 0) + (rand() - 0.5) * 2.5;
       } else if (!mounted) {
-        /* Entrada inicial: nuvem suave que se condensa no nome */
         var ang = rand() * Math.PI * 2;
         var spread = 16 + rand() * 58;
         px[i] = gx + Math.cos(ang) * spread;
@@ -353,6 +383,8 @@
     gl.enableVertexAttribArray(locSeed);
     gl.vertexAttribPointer(locSeed, 2, gl.FLOAT, false, 0, 0);
 
+    autoOrb.initialized = false;
+
     if (!mounted) {
       titleEl.appendChild(canvas);
       titleEl.classList.add('has-particle-title');
@@ -360,43 +392,46 @@
     }
   }
 
-  /* ---------- Interação de ponteiro e toque (efeito pincel de fumaça) ---------- */
-  function updatePointer(clientX, clientY) {
-    if (!inView || !mounted) return;
-    var r = titleEl.getBoundingClientRect();
-    var lx = clientX - r.left + PAD;
-    var ly = clientY - r.top + PAD;
+  /* ---------- Explosão nebulosa (canto superior esquerdo no desktop) ---------- */
+  function triggerExplosion() {
+    if (!inView || !mounted || count === 0) return;
+    var now = performance.now();
+    if (now - lastExplosionAt < 1800) return;
+    lastExplosionAt = now;
 
-    /* Só ativa quando o ponteiro está dentro da área expandida do título */
-    var near = lx >= -40 && lx <= canvasW + 40 && ly >= -40 && ly <= canvasH + 40;
-    if (!near) {
-      pointer.active = false;
-      return;
+    var cx = PAD + textW * 0.5;
+    var cy = PAD + textH * 0.5;
+    var maxSpan = Math.max(textW * 0.55, 180);
+
+    for (var i = 0; i < count; i++) {
+      var ph = seedData[i * 2];
+      var sz = seedData[i * 2 + 1];
+      var dx = px[i] - cx;
+      var dy = py[i] - cy;
+      var d = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = dx / d;
+      var ny = dy / d;
+
+      /* Dispersão elíptica ampla em nuvem luminosa (evita borda circular dura) */
+      var ang = ph * 6.2831853 + Math.atan2(ny, nx) * 0.45;
+      var amp = (7.5 + sz * 15.5) * (0.65 + (d / maxSpan) * 0.55);
+      vx[i] += Math.cos(ang) * amp * 1.25 + nx * 6.5;
+      vy[i] += Math.sin(ang) * amp * 0.85 + ny * 4.5;
     }
 
-    if (pointer.active) {
-      pointer.vx = Math.max(-45, Math.min(45, (lx - pointer.x) * 0.7 + pointer.vx * 0.3));
-      pointer.vy = Math.max(-45, Math.min(45, (ly - pointer.y) * 0.7 + pointer.vy * 0.3));
-    } else {
-      pointer.vx = 0;
-      pointer.vy = 0;
-    }
-    pointer.prevX = pointer.x;
-    pointer.prevY = pointer.y;
-    pointer.x = lx;
-    pointer.y = ly;
-    pointer.active = true;
-    pointer.lastMove = performance.now();
+    explosionFlash = 1.0;
+    explosionHold = 1.0;
   }
 
-  function triggerBurst(clientX, clientY) {
+  /* ---------- Rajada orgânica de fumaça (clique no PC / toque rápido no celular) ---------- */
+  function triggerBurst(clientX, clientY, isTouch) {
     if (!inView || !mounted || count === 0) return;
     var r = titleEl.getBoundingClientRect();
     if (clientX < r.left - 30 || clientX > r.right + 30 || clientY < r.top - 30 || clientY > r.bottom + 30) return;
 
     var bx = clientX - r.left + PAD;
     var by = clientY - r.top + PAD;
-    var radius = window.innerWidth >= 900 ? 150 : 105;
+    var radius = isTouch ? 120 : (window.innerWidth >= 900 ? 150 : 115);
     var r2 = radius * radius;
 
     for (var i = 0; i < count; i++) {
@@ -405,19 +440,70 @@
       var d2 = dx * dx + dy * dy;
       if (d2 < r2) {
         var d = Math.sqrt(d2) || 0.5;
-        var f = (1 - d / radius);
-        var power = (16 + seedData[i * 2 + 1] * 9) * f * f;
+        var f = 1 - d / radius;
+        var ph = seedData[i * 2];
+        var sz = seedData[i * 2 + 1];
         var nx = dx / d;
         var ny = dy / d;
-        var swirl = (seedData[i * 2] > 0.5 ? 1 : -1) * 5.5 * f;
+
+        /* Modulação angular orgânica para parecer fumaça real e nunca um círculo rígido */
+        var angle = Math.atan2(ny, nx);
+        var organic = 0.55 + 0.45 * Math.sin(angle * 3.0 + ph * 6.283);
+        var power = (isTouch ? 11.5 : 14.5 + sz * 8.5) * f * f * organic;
+        var swirl = (ph > 0.5 ? 1 : -1) * (isTouch ? 7.2 : 6.0) * f;
+
         vx[i] += nx * power - ny * swirl;
-        vy[i] += ny * power + nx * swirl;
+        vy[i] += ny * power + nx * swirl - (isTouch ? 1.8 * f : 0.8 * f);
       }
     }
   }
 
+  /* ---------- Interação de mouse (PC) e toque rápido (Opção B no celular) ---------- */
+  function updateMousePointer(clientX, clientY) {
+    if (!inView || !mounted) return;
+
+    /* Gatilho no canto superior esquerdo da tela (explosão + reconstrução) */
+    var inCorner = clientX <= 150 && clientY <= 95;
+    if (inCorner && !inTopLeftZone) {
+      inTopLeftZone = true;
+      triggerExplosion();
+    } else if (!inCorner && (clientX > 185 || clientY > 125)) {
+      inTopLeftZone = false;
+    }
+
+    var r = titleEl.getBoundingClientRect();
+    var lx = clientX - r.left + PAD;
+    var ly = clientY - r.top + PAD;
+
+    var near = lx >= -40 && lx <= canvasW + 40 && ly >= -40 && ly <= canvasH + 40;
+    if (!near) {
+      pointer.active = false;
+      return;
+    }
+
+    var moved = !pointer.active || Math.hypot(lx - pointer.x, ly - pointer.y) > 0.6;
+    if (pointer.active) {
+      pointer.vx = Math.max(-45, Math.min(45, (lx - pointer.x) * 0.7 + pointer.vx * 0.3));
+      pointer.vy = Math.max(-45, Math.min(45, (ly - pointer.y) * 0.7 + pointer.vy * 0.3));
+    } else {
+      pointer.vx = 0;
+      pointer.vy = 0;
+    }
+    pointer.x = lx;
+    pointer.y = ly;
+    pointer.active = true;
+    if (moved) pointer.lastMove = performance.now();
+  }
+
+  /* Mouse / caneta: rastro contínuo intacto no PC; touch é ignorado no pointermove (Opção B) */
   window.addEventListener('pointermove', function (e) {
-    updatePointer(e.clientX, e.clientY);
+    if (e.pointerType === 'touch') {
+      if (touchTap && (Math.abs(e.clientX - touchTap.x) > 12 || Math.abs(e.clientY - touchTap.y) > 12)) {
+        touchTap = null; // usuário está rolando a tela: cancela tap
+      }
+      return;
+    }
+    updateMousePointer(e.clientX, e.clientY);
   }, { passive: true });
 
   document.addEventListener('pointerleave', function () {
@@ -425,14 +511,41 @@
   });
 
   titleEl.addEventListener('pointerdown', function (e) {
-    triggerBurst(e.clientX, e.clientY);
+    if (e.pointerType === 'touch') {
+      touchTap = { x: e.clientX, y: e.clientY, time: performance.now() };
+      return;
+    }
+    triggerBurst(e.clientX, e.clientY, false);
+  }, { passive: true });
+
+  window.addEventListener('pointerup', function (e) {
+    if (e.pointerType === 'touch' && touchTap) {
+      var dtTap = performance.now() - touchTap.time;
+      var distTap = Math.hypot(e.clientX - touchTap.x, e.clientY - touchTap.y);
+      if (dtTap < 360 && distTap <= 12) {
+        triggerBurst(e.clientX, e.clientY, true);
+      }
+      touchTap = null;
+    }
+  }, { passive: true });
+
+  window.addEventListener('pointercancel', function () {
+    touchTap = null;
+    pointer.active = false;
+  }, { passive: true });
+
+  window.addEventListener('scroll', function () {
+    touchTap = null;
   }, { passive: true });
 
   /* ---------- Observador de visibilidade (pausa quando fora do Hero) ---------- */
   if ('IntersectionObserver' in window) {
     var visObs = new IntersectionObserver(function (entries) {
       inView = entries[0].isIntersecting;
-      if (!inView) pointer.active = false;
+      if (!inView) {
+        pointer.active = false;
+        pointer.strength = 0;
+      }
     }, { rootMargin: '120px 0px 120px 0px' });
     visObs.observe(titleEl);
   }
@@ -452,28 +565,68 @@
     elapsed += dt;
     if (fadeIn < 1) fadeIn = Math.min(1, fadeIn + dt * 2.2);
 
+    if (explosionFlash > 0) explosionFlash = Math.max(0, explosionFlash - dt * 0.85);
+    if (explosionHold > 0) explosionHold = Math.max(0, explosionHold - dt * 1.05);
+
     var dt60 = dt * 60;
     var drag = Math.pow(0.885, dt60);
+    var isDesktop = window.innerWidth >= 900;
 
-    // Suaviza velocidade do ponteiro quando parado
+    /* Decaimento do ponteiro real quando o mouse fica parado (fecha o buraco sob a seta) */
     var idleMs = now - pointer.lastMove;
     if (idleMs > 60) {
       pointer.vx *= 0.82;
       pointer.vy *= 0.82;
     }
+    var pointerShouldPull = pointer.active && idleMs < 1150;
+    var targetPtrStrength = pointerShouldPull ? 1 : 0;
+    pointer.strength += (targetPtrStrength - pointer.strength) * (1 - Math.exp(-dt * (pointerShouldPull ? 14 : 4.2)));
 
-    var pActive = pointer.active;
+    /* Pincel autônomo ("efeito rodando") assume suavemente quando o mouse está parado ou fora (e no mobile) */
+    var autoAllowed = elapsed > 1.35 && pointer.strength < 0.25 && explosionHold < 0.15;
+    var targetAutoStrength = autoAllowed ? 1 : 0;
+    autoOrb.strength += (targetAutoStrength - autoOrb.strength) * (1 - Math.exp(-dt * (autoAllowed ? 2.4 : 8.0)));
+
+    /* Trajetória orgânica em figura-8 / órbita atravessando o nome e o cargo */
+    var orbT = elapsed * 0.62;
+    var targetAx = PAD + textW * (0.5 + 0.44 * Math.sin(orbT));
+    var targetAy = PAD + textH * (0.5 + 0.35 * Math.sin(orbT * 2.0 + 0.75));
+    if (!autoOrb.initialized) {
+      autoOrb.x = targetAx;
+      autoOrb.y = targetAy;
+      autoOrb.prevX = targetAx;
+      autoOrb.prevY = targetAy;
+      autoOrb.initialized = true;
+    } else {
+      autoOrb.prevX = autoOrb.x;
+      autoOrb.prevY = autoOrb.y;
+      autoOrb.x = targetAx;
+      autoOrb.y = targetAy;
+    }
+    var avx = (autoOrb.x - autoOrb.prevX) / Math.max(dt60, 0.2);
+    var avy = (autoOrb.y - autoOrb.prevY) / Math.max(dt60, 0.2);
+
+    var useMouse = pointer.strength > 0.02;
+    var pStr = pointer.strength;
     var mx = pointer.x;
     var my = pointer.y;
     var mvx = pointer.vx;
     var mvy = pointer.vy;
     var speed = Math.sqrt(mvx * mvx + mvy * mvy);
-    var baseR = window.innerWidth >= 900 ? 78 : 54;
-    var brushR = baseR + Math.min(speed * 0.55, 32);
+    var brushR = (isDesktop ? 78 : 54) + Math.min(speed * 0.55, 32);
     var brushR2 = brushR * brushR;
+
+    var useAuto = autoOrb.strength > 0.02;
+    var aStr = autoOrb.strength;
+    var ax = autoOrb.x;
+    var ay = autoOrb.y;
+    var autoR = isDesktop ? 64 : 44;
+    var autoR2 = autoR * autoR;
 
     var sinT = Math.sin(elapsed * 1.4);
     var cosT = Math.cos(elapsed * 1.1);
+    /* Durante a explosão, reduz a mola momentaneamente para a nuvem expandir antes de reconstruir */
+    var springScale = 1 - explosionHold * 0.78;
 
     for (var i = 0; i < count; i++) {
       var x = px[i];
@@ -482,8 +635,8 @@
       var vyi = vy[i];
       var phase = seedData[i * 2];
 
-      /* 1. Escavação + vórtice de fumaça ao redor do ponteiro */
-      if (pActive) {
+      /* 1A. Rastro de fumaça na ponta do mouse (PC) */
+      if (useMouse) {
         var dx = x - mx;
         var dy = y - my;
         var d2 = dx * dx + dy * dy;
@@ -495,13 +648,32 @@
           var nx = dx * invD;
           var ny = dy * invD;
 
-          /* Empurrão radial cria a borda luminosa em crescente igual ao Fable */
-          var radial = (9.5 + speed * 0.34) * t2 * dt60;
-          /* Rotação tangencial + arrasto do movimento dão aspecto de fumaça */
-          var spin = (phase > 0.5 ? 1 : -1) * (3.6 + speed * 0.14) * t * dt60;
+          var radial = (9.5 + speed * 0.34) * t2 * pStr * dt60;
+          var spin = (phase > 0.5 ? 1 : -1) * (3.6 + speed * 0.14) * t * pStr * dt60;
 
-          vxi += nx * radial - ny * spin + mvx * 0.24 * t * dt60;
-          vyi += ny * radial + nx * spin + mvy * 0.24 * t * dt60;
+          vxi += nx * radial - ny * spin + mvx * 0.24 * t * pStr * dt60;
+          vyi += ny * radial + nx * spin + mvy * 0.24 * t * pStr * dt60;
+        }
+      }
+
+      /* 1B. Onda de fumaça autônoma ("rodando" pelo nome quando o mouse para ou no mobile) */
+      if (useAuto) {
+        var adx = x - ax;
+        var ady = y - ay;
+        var ad2 = adx * adx + ady * ady;
+        if (ad2 < autoR2) {
+          var ad = Math.sqrt(ad2) || 0.5;
+          var at = 1 - ad / autoR;
+          var at2 = at * at;
+          var aInv = 1 / ad;
+          var anx = adx * aInv;
+          var any = ady * aInv;
+
+          var aRadial = (isDesktop ? 6.4 : 5.2) * at2 * aStr * dt60;
+          var aSpin = 2.8 * at * aStr * dt60;
+
+          vxi += anx * aRadial - any * aSpin + avx * 0.35 * at * aStr * dt60;
+          vyi += any * aRadial + anx * aSpin + avy * 0.35 * at * aStr * dt60;
         }
       }
 
@@ -515,7 +687,6 @@
         var dist = Math.sqrt(dist2);
         smoke = dist > 56 ? 1 : dist / 56;
 
-        /* Turbulência orgânica + leve flutuação ascendente quando em estado de fumaça */
         if (smoke > 0.04) {
           var curlAngle = (x * 0.024 + sinT) - (y * 0.024 + cosT) + phase * 6.283;
           var turb = (0.42 + phase * 0.38) * smoke * dt60;
@@ -523,8 +694,7 @@
           vyi += Math.sin(curlAngle) * turb - 0.085 * smoke * dt60;
         }
 
-        /* Mola mais solta longe de casa (fumaça demora e ondula) e firme perto (nitidez) */
-        var spring = (0.022 + 0.028 / (1 + dist * 0.032)) * dt60;
+        var spring = (0.022 + 0.028 / (1 + dist * 0.032)) * springScale * dt60;
         vxi = (vxi + odx * spring) * drag;
         vyi = (vyi + ody * spring) * drag;
 
@@ -556,6 +726,7 @@
     gl.uniform1f(uDpr, dpr);
     gl.uniform1f(uTime, elapsed);
     gl.uniform1f(uFade, fadeIn);
+    gl.uniform1f(uFlash, explosionFlash);
     gl.drawArrays(gl.POINTS, 0, count);
   }
 
@@ -568,17 +739,19 @@
     }
   });
 
-  /* Redimensionamento com debounce para manter alinhamento exato */
+  /* Redimensionamento inteligente: só reconstrói se a largura mudou (ignora barra mobile) */
   var resizeTimer = 0;
   window.addEventListener('resize', function () {
+    if (Math.abs(window.innerWidth - lastWidth) <= 2) return;
+    lastWidth = window.innerWidth;
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(function () {
       if (mounted) buildParticles(false);
     }, 180);
   }, { passive: true });
 
-  /* Inicializa somente após as fontes web (Manrope e Libre Baskerville) estarem prontas */
   function init() {
+    lastWidth = window.innerWidth;
     buildParticles(false);
     if (mounted && !rafId) {
       lastNow = performance.now();
@@ -592,11 +765,9 @@
     window.addEventListener('load', init);
   }
 
-  /* API para o main.js acionar morfismo suave quando o idioma mudar (PT <-> EN) */
   window.PortfolioTitleSmoke = {
     rebuild: function () {
       if (mounted) {
-        // Aguarda o próximo frame para o layout do novo idioma já estar calculado
         window.requestAnimationFrame(function () {
           buildParticles(true);
         });
