@@ -16,6 +16,7 @@ window.I18N_EN = {
   'nav.journey': 'Journey',
   'nav.certificates': 'Certificates',
   'cert.tag': '05 / Continuing education',
+  'cert.title': 'Courses and <em class="accent">certificates</em>',
   'cert.verify': 'View certificate',
   'cert.csharp': 'C# Fundamentals',
   'cert.more': 'Other certificates',
