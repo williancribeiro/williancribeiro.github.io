@@ -219,7 +219,7 @@
   /* ---------- 5. Seção ativa: navegação + régua lateral + WebGL 3D ---------- */
   var links = Array.prototype.slice.call(document.querySelectorAll('.nav__link'));
   var rulerItems = Array.prototype.slice.call(document.querySelectorAll('.ruler__item'));
-  var sectionOrder = ['topo', 'sobre', 'projetos', 'stack', 'trajetoria', 'contato'];
+  var sectionOrder = ['topo', 'sobre', 'projetos', 'stack', 'trajetoria', 'certificados', 'contato'];
 
   function setActiveSection(id) {
     links.forEach(function (link) {
@@ -267,8 +267,8 @@
       });
     }
 
-    // Spotlight seguindo o cursor nos cards, stats, chips, blocos da trajetória e contato
-    var spotlightEls = document.querySelectorAll('.card, .stat, .chip, .company, .contact__item');
+    // Spotlight seguindo o cursor nos cards, certificados, stats, chips, blocos da trajetória e contato
+    var spotlightEls = document.querySelectorAll('.card, .cert-card, .stat, .chip, .company, .contact__item');
     spotlightEls.forEach(function (el) {
       el.addEventListener('pointermove', function (e) {
         var r = el.getBoundingClientRect();
@@ -277,8 +277,8 @@
       }, { passive: true });
     });
 
-    // Inclinação 3D sutil nos cards de projeto
-    document.querySelectorAll('.card').forEach(function (card) {
+    // Inclinação 3D sutil nos cards de projeto e certificados
+    document.querySelectorAll('.card, .cert-card').forEach(function (card) {
       card.addEventListener('pointermove', function (e) {
         var r = card.getBoundingClientRect();
         var nx = ((e.clientX - r.left) / r.width) * 2 - 1;
@@ -327,7 +327,7 @@
     });
 
     // Pulso de energia nas partículas WebGL ao interagir com elementos de destaque
-    var energyEls = document.querySelectorAll('.card, .chip, .more__item, .btn, .ruler__item, .contact__item');
+    var energyEls = document.querySelectorAll('.card, .cert-card, .chip, .more__item, .btn, .ruler__item, .contact__item');
     energyEls.forEach(function (el) {
       el.addEventListener('pointerenter', function () {
         if (window.PortfolioParticles) window.PortfolioParticles.setHoverEnergy(0.7);

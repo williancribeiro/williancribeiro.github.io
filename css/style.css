@@ -991,21 +991,100 @@ html:not(.js) .section__tag::before { transform: scaleX(1); }
 .link:hover::after { transform: translate(2px, -2px); color: var(--accent-1); }
 .card__note { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); min-height: 32px; display: inline-flex; align-items: center; }
 
-/* Outros projetos (lista compacta — interação inspirada no Fable /) */
+/* Certificados (mesmo spotlight de claridade, borda luminosa e tilt 3D dos projetos) */
 .cert-card {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   color: var(--text);
-  border: 1px solid var(--border-strong);
-  border-radius: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.35s ease, opacity 0.35s ease, transform 0.35s var(--ease-fable);
 }
-.cert-card:hover, .cert-card:focus-visible { border-color: var(--accent-1); }
-.cert-card img { width: 100%; height: auto; }
-.cert-info { padding: clamp(18px, 3vw, 30px); display: grid; gap: 8px; }
-.cert-meta { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); }
-.cert-action { color: var(--accent-1); font-weight: 600; }
+/* Claridade especular + brilho verde-água/índigo seguindo o cursor por cima da imagem e do card */
+.cert-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.14), rgba(94, 234, 212, 0.14) 28%, rgba(129, 140, 248, 0.06) 50%, transparent 68%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+/* Realce luminoso na borda acompanhando o ponteiro */
+.cert-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  border-radius: inherit;
+  background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 0%), rgba(94, 234, 212, 0.65), rgba(129, 140, 248, 0.25) 45%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.cert-card.is-done {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+.cert-card:hover, .cert-card:focus-visible {
+  border-color: rgba(94, 234, 212, 0.38);
+  box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.10), 0 24px 60px -22px rgba(94, 234, 212, 0.32), 0 12px 32px -18px rgba(129, 140, 248, 0.25);
+}
+.cert-card:hover::before, .cert-card:focus-visible::before,
+.cert-card:hover::after, .cert-card:focus-visible::after { opacity: 1; }
+@media (hover: hover) {
+  .cards:has(.cert-card:hover) .cert-card:not(:hover) { opacity: 0.72; }
+}
+.cert-card img {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid var(--border);
+  filter: brightness(0.92) saturate(0.92);
+  transform-origin: center top;
+  transition: transform 0.6s var(--ease), filter 0.4s ease;
+}
+.cert-card:hover img, .cert-card:focus-visible img {
+  transform: scale(1.022);
+  filter: brightness(1.05) saturate(1.04);
+}
+.cert-info {
+  position: relative;
+  z-index: 1;
+  padding: clamp(18px, 3vw, 30px);
+  display: grid;
+  gap: 8px;
+  background: var(--surface-glass);
+}
+.cert-card:hover .card__title { color: #ffffff; }
+.cert-meta { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); transition: color 0.25s ease; }
+.cert-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-1);
+  font-weight: 600;
+}
+.cert-action [aria-hidden="true"] {
+  display: inline-block;
+  transition: transform 0.3s var(--ease-fable);
+}
+.cert-card:hover .cert-action [aria-hidden="true"],
+.cert-card:focus-visible .cert-action [aria-hidden="true"] {
+  transform: translate(3px, -3px);
+}
 .cert-row {
   display: flex;
   flex-wrap: wrap;
@@ -1013,9 +1092,31 @@ html:not(.js) .section__tag::before { transform: scaleX(1); }
   justify-content: space-between;
   gap: 8px 24px;
   padding: 18px 12px;
+  border-radius: 10px;
   color: var(--text);
+  transition: background-color 0.25s ease, padding 0.3s var(--ease-fable);
 }
-.cert-row:hover, .cert-row:focus-visible { background: var(--surface-2); }
+.cert-row:hover, .cert-row:focus-visible {
+  background: rgba(94, 234, 212, 0.05);
+  padding-inline: 18px;
+}
+.cert-row:hover .more__name, .cert-row:focus-visible .more__name {
+  color: var(--accent-1);
+  transform: translateX(6px);
+}
+.cert-row:hover .cert-meta, .cert-row:focus-visible .cert-meta { color: var(--text); }
+.cert-row .cert-meta [aria-hidden="true"] {
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--accent-1);
+  transition: transform 0.3s var(--ease-fable);
+}
+.cert-row:hover .cert-meta [aria-hidden="true"],
+.cert-row:focus-visible .cert-meta [aria-hidden="true"] {
+  transform: translate(2px, -2px);
+}
+
+/* Outros projetos (lista compacta — interação inspirada no Fable /) */
 
 .more-title {
   margin: 64px 0 8px;
@@ -1508,8 +1609,9 @@ a.more__link:focus-visible .more__name::after {
   transform: translateY(16px);
   filter: none;
 }
-/* Cards, chips, stats e itens mantêm também as transições de borda/brilho/opacidade do hover */
+/* Cards, certificados, chips, stats e itens mantêm também as transições de borda/brilho/opacidade do hover */
 .js .card.reveal,
+.js .cert-card.reveal,
 .js .chip.reveal,
 .js .stat.reveal {
   transition: opacity 0.8s var(--ease-arrive), transform 0.8s var(--ease-arrive), filter 0.8s var(--ease-arrive), border-color 0.3s ease, box-shadow 0.35s ease;
@@ -1525,7 +1627,8 @@ a.more__link:focus-visible .more__name::after {
   transition-delay: 0ms;
   transition-duration: 0.3s;
 }
-.js .card.reveal.is-done {
+.js .card.reveal.is-done,
+.js .cert-card.reveal.is-done {
   transition: border-color 0.3s ease, box-shadow 0.35s ease, opacity 0.3s ease, transform 0.35s var(--ease-fable);
 }
 .js .chip.reveal.is-done,
@@ -1550,9 +1653,9 @@ a.more__link:focus-visible .more__name::after {
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
   }
-  .btn:hover, .contact__item:hover, .card:hover .card__img,
-  .hero__photo.is-done, .card.is-done, .more__link:hover .more__name,
-  .chip:hover, .stat:hover { transform: none !important; }
+  .btn:hover, .contact__item:hover, .card:hover .card__img, .cert-card:hover img,
+  .hero__photo.is-done, .card.is-done, .cert-card.is-done, .more__link:hover .more__name,
+  .cert-row:hover .more__name, .chip:hover, .stat:hover { transform: none !important; }
 }
 
 @media print {

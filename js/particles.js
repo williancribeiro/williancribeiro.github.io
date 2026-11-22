@@ -1,7 +1,7 @@
 /* ==========================================================================
    Portfólio · Campo de partículas WebGL 3D (JavaScript puro, sem bibliotecas)
    Inspirado na estética do fable.sparo.com.br:
-   - Morfismo 3D contínuo por seção (toro/anel, onda, grade, globo, hélice, halo)
+   - Morfismo 3D contínuo por seção (toro, onda, grade, globo, hélice, selo, halo)
    - Entrada coreografada em condensação
    - Repulsão + vórtice suave seguindo o ponteiro
    - Onda de choque radial ao clicar em áreas livres
@@ -183,7 +183,7 @@
     return rngState / 4294967296;
   }
 
-  /* ---------- Geradores das 6 formações 3D (uma por seção) ---------- */
+  /* ---------- Geradores das 7 formações 3D (uma por seção) ---------- */
   function fillAmbient(arr, i) {
     arr[i * 3] = (rand() - 0.5) * 4.4;
     arr[i * 3 + 1] = (rand() - 0.5) * 2.8;
@@ -315,7 +315,79 @@
     return arr;
   }
 
-  // 5. Contato: Disco orbital / anéis concêntricos (accretion halo)
+  // 5. Certificados: Selo cristalino / medalhão facetado 3D com aro em roseta
+  function makeCertCrest() {
+    var arr = new Float32Array(COUNT * 3);
+    var coreEnd = Math.floor(SCULPT_COUNT * 0.46);
+    var sealEnd = Math.floor(SCULPT_COUNT * 0.84);
+
+    /* Vértices de um octaedro cristalino (diamante facetado 3D) */
+    var H = 0.78, W = 0.56;
+    var verts = [
+      [0, H, 0], [0, -H, 0],
+      [W, 0, 0], [0, 0, W], [-W, 0, 0], [0, 0, -W]
+    ];
+    var edges = [
+      [0, 2], [0, 3], [0, 4], [0, 5],
+      [1, 2], [1, 3], [1, 4], [1, 5],
+      [2, 3], [3, 4], [4, 5], [5, 2]
+    ];
+    var faces = [
+      [0, 2, 3], [0, 3, 4], [0, 4, 5], [0, 5, 2],
+      [1, 3, 2], [1, 4, 3], [1, 5, 4], [1, 2, 5]
+    ];
+    var cosT1 = Math.cos(0.46), sinT1 = Math.sin(0.46);
+    var cosT2 = Math.cos(-0.52), sinT2 = Math.sin(-0.52);
+
+    for (var i = 0; i < COUNT; i++) {
+      if (i >= SCULPT_COUNT) { fillAmbient(arr, i); continue; }
+
+      if (i < coreEnd) {
+        if (i % 5 !== 0) {
+          // Arestas nítidas do cristal (80% dos pontos do núcleo)
+          var e = edges[i % edges.length];
+          var a = verts[e[0]], b = verts[e[1]];
+          var t = rand();
+          arr[i * 3] = a[0] + (b[0] - a[0]) * t + (rand() - 0.5) * 0.032;
+          arr[i * 3 + 1] = a[1] + (b[1] - a[1]) * t + (rand() - 0.5) * 0.032;
+          arr[i * 3 + 2] = a[2] + (b[2] - a[2]) * t + (rand() - 0.5) * 0.032;
+        } else {
+          // Brilho sutil preenchendo as 8 faces triangulares
+          var f = faces[i % faces.length];
+          var v0 = verts[f[0]], v1 = verts[f[1]], v2 = verts[f[2]];
+          var u = rand(), v = rand();
+          if (u + v > 1) { u = 1 - u; v = 1 - v; }
+          var w = 1 - u - v;
+          arr[i * 3] = v0[0] * w + v1[0] * u + v2[0] * v;
+          arr[i * 3 + 1] = v0[1] * w + v1[1] * u + v2[1] * v;
+          arr[i * 3 + 2] = v0[2] * w + v1[2] * u + v2[2] * v;
+        }
+      } else if (i < sealEnd) {
+        // Aro externo recortado em roseta de 12 pontas (selo de certificação)
+        var ang = ((i - coreEnd) / (sealEnd - coreEnd)) * Math.PI * 2;
+        var rosette = 1.04 + 0.095 * Math.cos(12 * ang) + (rand() - 0.5) * 0.055;
+        var lx = Math.cos(ang) * rosette;
+        var ly = Math.sin(ang) * rosette;
+        var lz = (rand() - 0.5) * 0.06;
+        arr[i * 3] = lx;
+        arr[i * 3 + 1] = ly * cosT1 - lz * sinT1;
+        arr[i * 3 + 2] = ly * sinT1 + lz * cosT1;
+      } else {
+        // Anel orbital interno contra-inclinado emoldurando o cristal
+        var ang2 = ((i - sealEnd) / (SCULPT_COUNT - sealEnd)) * Math.PI * 2;
+        var r2 = 0.84 + (rand() - 0.5) * 0.035;
+        var rx = Math.cos(ang2) * r2;
+        var ry = (rand() - 0.5) * 0.03;
+        var rz = Math.sin(ang2) * r2;
+        arr[i * 3] = rx;
+        arr[i * 3 + 1] = ry * cosT2 - rz * sinT2;
+        arr[i * 3 + 2] = ry * sinT2 + rz * cosT2;
+      }
+    }
+    return arr;
+  }
+
+  // 6. Contato: Disco orbital / anéis concêntricos (accretion halo)
   function makeHaloDisc() {
     var arr = new Float32Array(COUNT * 3);
     for (var i = 0; i < COUNT; i++) {
@@ -336,11 +408,12 @@
     makeModularLattice(),
     makeGlobe(),
     makeHelix(),
+    makeCertCrest(),
     makeHaloDisc()
   ];
 
   /* Viés de matiz por seção (mantendo estritamente a paleta verde-água <-> índigo) */
-  var SHAPE_TINT = [-0.08, -0.14, -0.04, 0.14, 0.04, -0.10];
+  var SHAPE_TINT = [-0.08, -0.14, -0.04, 0.14, 0.04, -0.12, -0.10];
 
   /* Seeds estáveis por partícula */
   var seeds = new Float32Array(COUNT * 3);
@@ -456,6 +529,7 @@
       [-0.24, 0.02],  // Projetos
       [0.26, 0.0],    // Stack
       [0.28, -0.04],  // Trajetória
+      [-0.22, 0.02],  // Certificados
       [0.0, -0.02]    // Contato
     ];
     var pair = offsets[idx] || [0.24, 0.0];
